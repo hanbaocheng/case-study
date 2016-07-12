@@ -1,24 +1,28 @@
 package com.medion.trakttv;
 
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.TextView;
 
-public class MovieActivity extends AppCompatActivity {
+import com.medion.trakttv.data.MovieInfo;
+import com.medion.trakttv.dummy.DummyContent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MovieActivity extends AppCompatActivity implements MovieListFragment.OnListFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -135,16 +139,20 @@ public class MovieActivity extends AppCompatActivity {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
 
-            switch (position)
-            {
+            switch (position) {
                 case 0:
                     // Show movie list
-                    break;
+                    List<MovieInfo> items = new ArrayList<>();
+                    for (int i = 0; i < 10; i++){
+                        //items.add(new DummyContent.DummyItem("" + i, "Context", "Detail"));
+                    }
+                    MovieItemRecyclerViewAdapter movieListFragmentAdapter  = new MovieItemRecyclerViewAdapter(items, MovieActivity.this);
+                    return MovieListFragment.newInstance(1);
                 case 1:
                     // Show the detail information of selected movie
-                    break;
+                    return PlaceholderFragment.newInstance(2);
             }
-            return PlaceholderFragment.newInstance(position + 1);
+            return null;
         }
 
         @Override
@@ -157,11 +165,19 @@ public class MovieActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "Movie List";
                 case 1:
-                    return "SECTION 2";
+                    return "Movie Detail";
             }
             return null;
         }
+    }
+
+    @Override
+    public void onListFragmentInteraction(MovieInfo item) {
+        // Smooth scroll to detail fragment to show the detail
+        mViewPager.setCurrentItem(1,true);
+        Snackbar.make(mViewPager, item.getOverview(), Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 }
