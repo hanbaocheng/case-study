@@ -45,6 +45,10 @@ public class MovieService extends IntentService {
         if (HttpStatus.STATUS_200 == HttpStatus.getEnum(statusCode)) {
             /* Status Finished */
             bundle.putParcelableArrayList(Constants.EXTENDED_DATA_RESULT, movieInfoList);
+
+            // Send query filter to UI to verity if the data is out of date
+            bundle.putString(Constants.EXTENDED_DATA_ERROR, queryFilter);
+
             receiver.send(Constants.STATUS_FINISHED, bundle);
         } else {
             /* Sending error message back to activity */

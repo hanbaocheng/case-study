@@ -3,12 +3,14 @@ package com.medion.trakttv;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -96,6 +98,21 @@ public class MovieActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_movie, menu);
+
+        MenuItem myActionMenuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) myActionMenuItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                Snackbar.make(mViewPager, s, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                return true;
+            }
+        });
+
         return true;
     }
 
@@ -125,6 +142,17 @@ public class MovieActivity extends AppCompatActivity implements
         private static final String ARG_SECTION_NUMBER = "section_number";
 
         public PlaceholderFragment() {
+        }
+
+        @Override
+        public void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setHasOptionsMenu(true);
+        }
+
+        public void onPrepareOptionsMenu(Menu menu) {
+            MenuItem item=menu.findItem(R.id.action_search);
+            item.setVisible(false);
         }
 
         /**
@@ -167,7 +195,8 @@ public class MovieActivity extends AppCompatActivity implements
             switch (position) {
                 case 0:
                     // Show movie list
-                    return mMovieListFragment = MovieListFragment.newInstance(1);
+                    mMovieListFragment = MovieListFragment.newInstance(1);
+                    return mMovieListFragment;
                 case 1:
                     // Show the detail information of selected movie
                     return PlaceholderFragment.newInstance(2);
@@ -209,10 +238,21 @@ public class MovieActivity extends AppCompatActivity implements
                 break;
             case Constants.STATUS_FINISHED:
                 ArrayList<MovieInfo> movieInfoList = resultData.getParcelableArrayList(Constants.EXTENDED_DATA_RESULT);
+                String token = resultData.getString(Constants.EXTENDED_DATA_ERROR);
 
-                if (mMovieListFragment != null)
-                    mMovieListFragment.updateAdapterDateValues(movieInfoList);
-
+                // Check if the data is the one I latest require
+                synchronized (mQueryFilter) {
+                    if (mMovieListFragment != null && token != null && token.equals(mQueryFilter)) {
+                        // The first page of new session
+                        if (mPageIndex == 1)
+                        {
+                            MovieItemRecyclerViewAdapter mMovieItemRecyclerViewAdapter = new MovieItemRecyclerViewAdapter(movieInfoList, MovieActivity.this);
+                            mMovieListFragment.setAdapter(mMovieItemRecyclerViewAdapter);
+                        } else {
+                            mMovieListFragment.updateAdapterDateValues(movieInfoList);
+                        }
+                    }
+                }
                 break;
             case Constants.STATUS_ERROR:
                 /* Handle the error */

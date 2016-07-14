@@ -27,6 +27,12 @@ public final class Constants {
     public static final String EXTENDED_DATA_ERROR =
             "com.medion.trakttv.downloadreceiver.ERROR";
 
+    // Defines the key for the token in an Intent
+    // UI use this property to verify the return data
+    // in case there are outdated data not being showing
+    public static final String EXTENDED_DATA_TOKEN =
+            "com.medion.trakttv.downloadreceiver.TOKEN";
+
     // Defines the value for the status in an Intent
     public static final int STATUS_RUNNING = 0;
     public static final int STATUS_FINISHED = 1;

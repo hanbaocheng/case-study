@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.medion.trakttv.data.MovieInfo;
-import com.medion.trakttv.dummy.DummyContent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +58,14 @@ public class MovieListFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+
     }
 
-/*    public void setAdapter(MovieItemRecyclerViewAdapter movieItemRecyclerViewAdapter){
-        if (movieItemRecyclerViewAdapter != null)
-        mMovieItemRecyclerViewAdapter = movieItemRecyclerViewAdapter;
-    }*/
+    public void setAdapter(MovieItemRecyclerViewAdapter movieItemRecyclerViewAdapter){
+        if (mRecyclerView != null)
+            mMovieItemRecyclerViewAdapter = movieItemRecyclerViewAdapter;
+            mRecyclerView.setAdapter(movieItemRecyclerViewAdapter);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,7 +85,7 @@ public class MovieListFragment extends Fragment {
             }
 
             // Set the adapter
-            mMovieItemRecyclerViewAdapter = new MovieItemRecyclerViewAdapter(DummyContent.ITEMS, mListener);
+            mMovieItemRecyclerViewAdapter = new MovieItemRecyclerViewAdapter(new ArrayList<MovieInfo>(), mListener);
             recyclerView.setAdapter(mMovieItemRecyclerViewAdapter);
 
             if (recyclerView.getLayoutManager() instanceof LinearLayoutManager){
@@ -95,6 +96,7 @@ public class MovieListFragment extends Fragment {
                     @Override
                     public void onLoadMore(int page) {
 
+                        // Load next page
                         mListener.onLoadNextPage();
                     }
                 });
