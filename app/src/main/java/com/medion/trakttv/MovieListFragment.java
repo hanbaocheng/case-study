@@ -12,7 +12,9 @@ import android.view.ViewGroup;
 
 import com.medion.trakttv.data.MovieInfo;
 import com.medion.trakttv.dummy.DummyContent;
-import com.medion.trakttv.dummy.DummyContent.DummyItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -26,8 +28,13 @@ public class MovieListFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
+    private OnListFragmentInteractionListener mListener = null;
 
+    private MovieItemRecyclerViewAdapter mMovieItemRecyclerViewAdapter = null;
+
+    ArrayList<MovieInfo> mMovieInfoList;
+
+    RecyclerView mRecyclerView;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -54,25 +61,53 @@ public class MovieListFragment extends Fragment {
         }
     }
 
+/*    public void setAdapter(MovieItemRecyclerViewAdapter movieItemRecyclerViewAdapter){
+        if (movieItemRecyclerViewAdapter != null)
+        mMovieItemRecyclerViewAdapter = movieItemRecyclerViewAdapter;
+    }*/
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.movieitem_list, container, false);
 
-        // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
+            mRecyclerView = recyclerView;
+
+            // Set LayoutManager, could be LinearLayoutManager or GridLayoutManager
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MovieItemRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+
+            // Set the adapter
+            mMovieItemRecyclerViewAdapter = new MovieItemRecyclerViewAdapter(DummyContent.ITEMS, mListener);
+            recyclerView.setAdapter(mMovieItemRecyclerViewAdapter);
+
+            if (recyclerView.getLayoutManager() instanceof LinearLayoutManager){
+
+                final LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
+
+                recyclerView.addOnScrollListener(new InfiniteRecyclerViewScrollListener(layoutManager) {
+                    @Override
+                    public void onLoadMore(int page) {
+
+                        mListener.onLoadNextPage();
+                    }
+                });
+            }
+
         }
         return view;
     }
 
+    public void updateAdapterDateValues(List<MovieInfo> movieDataList)
+    {
+        mMovieItemRecyclerViewAdapter.insertFeedValues(movieDataList);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -104,5 +139,8 @@ public class MovieListFragment extends Fragment {
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
         void onListFragmentInteraction(MovieInfo item);
+
+        // Load next Page
+        void onLoadNextPage();
     }
 }

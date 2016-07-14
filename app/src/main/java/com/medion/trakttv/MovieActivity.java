@@ -1,7 +1,8 @@
 package com.medion.trakttv;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,12 +18,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.medion.trakttv.data.MovieInfo;
-import com.medion.trakttv.dummy.DummyContent;
+import com.medion.trakttv.receiver.DownloadResultReceiver;
+import com.medion.trakttv.service.MovieService;
+import com.medion.trakttv.utils.Constants;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class MovieActivity extends AppCompatActivity implements MovieListFragment.OnListFragmentInteractionListener {
+public class MovieActivity extends AppCompatActivity implements
+            MovieListFragment.OnListFragmentInteractionListener,
+            DownloadResultReceiver.Receiver{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -39,6 +43,32 @@ public class MovieActivity extends AppCompatActivity implements MovieListFragmen
      */
     private ViewPager mViewPager;
 
+    //ResultReceiver for receiving the result from MovieService
+    private DownloadResultReceiver mDownloadReceiver;
+
+    // The page index of the next fetching
+    private int mPageIndex = 1;
+
+    // The query filter
+    private String mQueryFilter = "";
+
+    private void requestNextPage() {
+        /*
+         * Creates a new Intent to start the MovieService
+         * IntentService. Passes a request and a ResultReceiver
+         * in the Intent's "data" field.
+         */
+        Intent mServiceIntent = new Intent(this, MovieService.class);
+        /* Send optional extras to Download IntentService */
+        mServiceIntent.putExtra(Constants.RECEIVER, mDownloadReceiver);
+        mServiceIntent.putExtra(Constants.REQUSET_PAGE, mPageIndex);
+        mServiceIntent.putExtra(Constants.REQUSET_PAGE_COUNT, Constants.PAGE_COUNT);
+        mServiceIntent.putExtra(Constants.REQUSET_FILTER_QUERY, mQueryFilter);
+
+        // Starts the IntentService
+        startService(mServiceIntent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,16 +84,11 @@ public class MovieActivity extends AppCompatActivity implements MovieListFragmen
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        /* Starting Download Service */
+        mDownloadReceiver = new DownloadResultReceiver(new Handler());
+        mDownloadReceiver.setReceiver(this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
+        requestNextPage();
     }
 
 
@@ -142,12 +167,7 @@ public class MovieActivity extends AppCompatActivity implements MovieListFragmen
             switch (position) {
                 case 0:
                     // Show movie list
-                    List<MovieInfo> items = new ArrayList<>();
-                    for (int i = 0; i < 10; i++){
-                        //items.add(new DummyContent.DummyItem("" + i, "Context", "Detail"));
-                    }
-                    MovieItemRecyclerViewAdapter movieListFragmentAdapter  = new MovieItemRecyclerViewAdapter(items, MovieActivity.this);
-                    return MovieListFragment.newInstance(1);
+                    return mMovieListFragment = MovieListFragment.newInstance(1);
                 case 1:
                     // Show the detail information of selected movie
                     return PlaceholderFragment.newInstance(2);
@@ -177,7 +197,41 @@ public class MovieActivity extends AppCompatActivity implements MovieListFragmen
     public void onListFragmentInteraction(MovieInfo item) {
         // Smooth scroll to detail fragment to show the detail
         mViewPager.setCurrentItem(1,true);
-        Snackbar.make(mViewPager, item.getOverview(), Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+    }
+
+    MovieListFragment mMovieListFragment;
+    ArrayList<MovieInfo> mMovieInfoList;
+
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        switch (resultCode) {
+            case Constants.STATUS_RUNNING:
+                break;
+            case Constants.STATUS_FINISHED:
+                ArrayList<MovieInfo> movieInfoList = resultData.getParcelableArrayList(Constants.EXTENDED_DATA_RESULT);
+
+                if (mMovieListFragment != null)
+                    mMovieListFragment.updateAdapterDateValues(movieInfoList);
+
+                break;
+            case Constants.STATUS_ERROR:
+                /* Handle the error */
+                String error = resultData.getString(Constants.EXTENDED_DATA_ERROR, "Unknown Error");
+                Snackbar.make(mViewPager, error, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                break;
+        }
+    }
+
+    @Override
+    public void onLoadNextPage() {
+        /**
+         * Send request to MovieService to fetch next page
+         */
+
+        // One page successfully returned, so we set the mPageIndex++
+        mPageIndex = mPageIndex + 1;
+
+        // Load next page
+        requestNextPage();
     }
 }
