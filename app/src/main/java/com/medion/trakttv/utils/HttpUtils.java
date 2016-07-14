@@ -36,13 +36,14 @@ public class HttpUtils {
     private  HttpUtils(){
     }
 
-    public int getfromTraktTv(ArrayList<MovieInfo> movieInfoList) {
+    public int getfromTraktTv(int pageIndex, int pageCount, String queryFilter, ArrayList<MovieInfo> movieInfoList) {
         InputStream inputStream = null;
         HttpURLConnection urlConnection = null;
         int statusCode = 0;
         try {
             /* forming th java.net.URL object */
-            URL url = new URL("https://api.trakt.tv/movies/popular/?page=1&limit=10&extended=full,images");
+            String urlString = String.format("https://api.trakt.tv/movies/popular/?page=%d&limit=%d&extended=full,images&query=%s", pageIndex, pageCount, queryFilter);
+            URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
 
             /* optional request header */

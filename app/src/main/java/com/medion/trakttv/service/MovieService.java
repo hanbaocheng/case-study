@@ -6,13 +6,11 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import com.medion.trakttv.data.MovieInfo;
-import com.medion.trakttv.dummy.DummyContent;
 import com.medion.trakttv.utils.Constants;
 import com.medion.trakttv.utils.HttpStatus;
 import com.medion.trakttv.utils.HttpUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MovieService extends IntentService {
 
@@ -26,7 +24,10 @@ public class MovieService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         // Gets request date from the incoming Intent
         final ResultReceiver receiver = intent.getParcelableExtra(Constants.RECEIVER);
-        final int request_number = intent.getIntExtra(Constants.REQUSET,0);
+        final int pageIndex = intent.getIntExtra(Constants.REQUSET_PAGE,0);
+        final int pageCount = intent.getIntExtra(Constants.REQUSET_PAGE_COUNT,0);
+        final String queryFilter = intent.getStringExtra(Constants.REQUSET_FILTER_QUERY);
+
         Bundle bundle = new Bundle();
 
         /*
@@ -38,7 +39,7 @@ public class MovieService extends IntentService {
         ArrayList<MovieInfo> movieInfoList = new ArrayList<MovieInfo>();
 
         //fetch data from server
-        int statusCode = HttpUtils.getInstance().getfromTraktTv(movieInfoList);
+        int statusCode = HttpUtils.getInstance().getfromTraktTv(pageIndex, pageCount, queryFilter, movieInfoList);
 
         //check the status and return to activity
         if (HttpStatus.STATUS_200 == HttpStatus.getEnum(statusCode)) {

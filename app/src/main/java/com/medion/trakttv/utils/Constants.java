@@ -1,17 +1,15 @@
 package com.medion.trakttv.utils;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Created by bhan on 7/13/16.
  */
 public final class Constants {
 
     public static final String RECEIVER = "downloadreceiver";
-    public static final String REQUSET = "downloadrequest";
-    public static final int REQUSET_NUMBER = 10;
+    public static final String REQUSET_PAGE = "request_page";
+    public static final String REQUSET_PAGE_COUNT = "request_page_count";
+    public static final int PAGE_COUNT = 10;
+    public static final String REQUSET_FILTER_QUERY = "request_filter_query";
 
     // Defines a custom Intent action
     public static final String BROADCAST_ACTION =
