@@ -61,7 +61,18 @@ public class MovieItemRecyclerViewAdapter extends RecyclerView.Adapter<MovieItem
         if (holder instanceof FooterViewHolder) {
 
             mFooterViewHolder = (FooterViewHolder)holder;
-//            holder.mTitle.setText("Footer");
+
+            mFooterViewHolder.mFooter.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mListener) {
+                        // Click the footer to query next page, although for most time, this action is useless.
+                        // Just in case the network get lost or last request get lost
+                        // At this point, to click the footer, we get a anther chance to query next page.
+                        mListener.onLoadNextPage();
+                    }
+                }
+            });
 
         } else if (holder instanceof ViewHolder) {
             holder.mMovieInfo = mValues.get(position);

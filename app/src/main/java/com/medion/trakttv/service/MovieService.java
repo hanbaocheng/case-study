@@ -45,6 +45,9 @@ public class MovieService extends IntentService {
 
             // Send query filter to UI to verity if the data is out of date
             bundle.putString(Constants.EXTENDED_DATA_ERROR, queryFilter);
+            // Send page index to UI to verity if the data is right page
+            bundle.putInt(Constants.REQUSET_PAGE, pageIndex);
+
             receiver.send(Constants.STATUS_FINISHED, bundle);
         } else {
             /* Sending error message back to activity */

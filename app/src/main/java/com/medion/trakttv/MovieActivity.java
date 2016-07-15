@@ -51,7 +51,6 @@ public class MovieActivity extends AppCompatActivity implements
 
     // Movie List fragment
     MovieListFragment mMovieListFragment;
-    ArrayList<MovieInfo> mMovieInfoList;
 
     // Movie Detail fragment
     MovieDetailFragment mMovieDetailFragment;
@@ -201,17 +200,25 @@ public class MovieActivity extends AppCompatActivity implements
             case Constants.STATUS_FINISHED:
                 ArrayList<MovieInfo> movieInfoList = resultData.getParcelableArrayList(Constants.EXTENDED_DATA_RESULT);
                 String token = resultData.getString(Constants.EXTENDED_DATA_ERROR);
+                int pageOfData = resultData.getInt(Constants.REQUSET_PAGE);
 
                 // Check if the data is the one I latest require
                 synchronized (mQueryFilter) {
                     if (mMovieListFragment != null && token != null && token.equals(mQueryFilter)) {
-                        // The first page of new session
-                        if (mPageIndex == 1)
-                        {
-                            MovieItemRecyclerViewAdapter mMovieItemRecyclerViewAdapter = new MovieItemRecyclerViewAdapter(movieInfoList, MovieActivity.this);
-                            mMovieListFragment.setAdapter(mMovieItemRecyclerViewAdapter);
-                        } else {
-                            mMovieListFragment.updateAdapterDateValues(movieInfoList);
+
+                        if (pageOfData == mPageIndex) {
+                            // The first page of new session
+                            if (mPageIndex == 1) {
+                                MovieItemRecyclerViewAdapter mMovieItemRecyclerViewAdapter = new MovieItemRecyclerViewAdapter(movieInfoList, MovieActivity.this);
+                                mMovieListFragment.setAdapter(mMovieItemRecyclerViewAdapter);
+                            } else {
+                                mMovieListFragment.updateAdapterDateValues(movieInfoList);
+                            }
+
+                            // One page successfully returned, so we set the mPageIndex++
+                            if (movieInfoList.size() != 0) {
+                                mPageIndex = mPageIndex + 1;
+                            }
                         }
                     }
                 }
@@ -229,9 +236,6 @@ public class MovieActivity extends AppCompatActivity implements
         /**
          * Send request to MovieService to fetch next page
          */
-
-        // One page successfully returned, so we set the mPageIndex++
-        mPageIndex = mPageIndex + 1;
 
         // Load next page
         requestNextPage();
