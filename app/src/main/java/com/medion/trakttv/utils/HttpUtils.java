@@ -109,7 +109,7 @@ public class HttpUtils {
                 MovieInfo movieInfo = new MovieInfo();
 
                 movieInfo.setTitle(data.getTitle());
-                movieInfo.setThumbnail(data.getImages().getPoster().getThumb());
+                movieInfo.setThumbnail(data.getImages().getFanart().getThumb());
                 movieInfo.setReleaseyear(data.getReleased());
                 movieInfo.setOverview(data.getOverview());
 

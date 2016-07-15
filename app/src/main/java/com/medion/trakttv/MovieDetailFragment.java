@@ -48,10 +48,10 @@ public class MovieDetailFragment extends Fragment{
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-          mThumbnail = (ImageView) rootView.findViewById(R.id.detail_thumbnail);
-          mTitle = (TextView) rootView.findViewById(R.id.detail_title);
-          mReleased = (TextView) rootView.findViewById(R.id.detail_released);
-          mOverview = (TextView) rootView.findViewById(R.id.detail_overview);
+          mThumbnail = (ImageView) rootView.findViewById(R.id.thumbnail);
+          mTitle = (TextView) rootView.findViewById(R.id.title);
+          mReleased = (TextView) rootView.findViewById(R.id.released);
+          mOverview = (TextView) rootView.findViewById(R.id.overview);
 
         return rootView;
     }
