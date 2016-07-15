@@ -54,6 +54,13 @@ public class MovieActivity extends AppCompatActivity implements
     // The query filter
     private String mQueryFilter = "";
 
+    // Movie List fragment
+    MovieListFragment mMovieListFragment;
+    ArrayList<MovieInfo> mMovieInfoList;
+
+    // Movie Detail fragment
+    MovieDetailFragment mMovieDetailFragment;
+
     private void requestNextPage() {
         /*
          * Creates a new Intent to start the MovieService
@@ -108,7 +115,13 @@ public class MovieActivity extends AppCompatActivity implements
             }
             @Override
             public boolean onQueryTextChange(String s) {
-                Snackbar.make(mViewPager, s, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                // Everytime the search query get changed, reset query filter and send request
+                if (s.equals(mQueryFilter) == false) {
+                    mPageIndex = 1;
+                    mQueryFilter = "" + s;
+                    requestNextPage();
+                }
+//                Snackbar.make(mViewPager, s, Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return true;
             }
         });
@@ -199,7 +212,8 @@ public class MovieActivity extends AppCompatActivity implements
                     return mMovieListFragment;
                 case 1:
                     // Show the detail information of selected movie
-                    return PlaceholderFragment.newInstance(2);
+                    mMovieDetailFragment = MovieDetailFragment.newInstance();
+                    return mMovieDetailFragment;
             }
             return null;
         }
@@ -223,13 +237,11 @@ public class MovieActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onListFragmentInteraction(MovieInfo item) {
+    public void onListFragmentInteraction(MovieInfo movieInfo) {
         // Smooth scroll to detail fragment to show the detail
         mViewPager.setCurrentItem(1,true);
+        mMovieDetailFragment.updateMovieDetail(movieInfo);
     }
-
-    MovieListFragment mMovieListFragment;
-    ArrayList<MovieInfo> mMovieInfoList;
 
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {

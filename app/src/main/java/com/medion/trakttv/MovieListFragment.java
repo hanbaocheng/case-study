@@ -61,10 +61,29 @@ public class MovieListFragment extends Fragment {
 
     }
 
+    /**
+     * Set new Adapter
+     * @param movieItemRecyclerViewAdapter
+     */
     public void setAdapter(MovieItemRecyclerViewAdapter movieItemRecyclerViewAdapter){
-        if (mRecyclerView != null)
+        if (mRecyclerView != null) {
             mMovieItemRecyclerViewAdapter = movieItemRecyclerViewAdapter;
             mRecyclerView.setAdapter(movieItemRecyclerViewAdapter);
+
+            if (mRecyclerView.getLayoutManager() instanceof LinearLayoutManager) {
+
+                final LinearLayoutManager layoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
+
+                mRecyclerView.addOnScrollListener(new InfiniteRecyclerViewScrollListener(layoutManager) {
+                    @Override
+                    public void onLoadMore(int page) {
+
+                        // Load next page
+                        mListener.onLoadNextPage();
+                    }
+                });
+            }
+        }
     }
 
     @Override
@@ -86,7 +105,8 @@ public class MovieListFragment extends Fragment {
 
             // Set the adapter
             mMovieItemRecyclerViewAdapter = new MovieItemRecyclerViewAdapter(new ArrayList<MovieInfo>(), mListener);
-            recyclerView.setAdapter(mMovieItemRecyclerViewAdapter);
+            setAdapter(mMovieItemRecyclerViewAdapter);
+/*            recyclerView.setAdapter(mMovieItemRecyclerViewAdapter);
 
             if (recyclerView.getLayoutManager() instanceof LinearLayoutManager){
 
@@ -100,7 +120,7 @@ public class MovieListFragment extends Fragment {
                         mListener.onLoadNextPage();
                     }
                 });
-            }
+            }*/
 
         }
         return view;
