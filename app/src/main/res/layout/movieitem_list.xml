@@ -10,4 +10,5 @@
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
     tools:context="com.medion.trakttv.MovieListFragment"
-    tools:listitem="@layout/movieitem" />
+    tools:listitem="@layout/movieitem"
+    android:scrollbars="vertical"/>
