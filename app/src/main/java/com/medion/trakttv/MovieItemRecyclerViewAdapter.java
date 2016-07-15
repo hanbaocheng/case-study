@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.medion.trakttv.MovieListFragment.OnListFragmentInteractionListener;
@@ -36,8 +37,17 @@ public class MovieItemRecyclerViewAdapter extends RecyclerView.Adapter<MovieItem
 
         // Create Footer
         if (viewType == FOOTER_VIEW) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.movielist_footer, parent, false);
-            return new FooterViewHolder(view);
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.movielist_footer, parent, false);
+            FooterViewHolder footer = new FooterViewHolder(view);
+
+            // By default, if there is no data, show no content footer
+            if (mValues.size() == 0) {
+                footer.mProgressBar.setVisibility(View.GONE);
+                footer.mNoContent.setVisibility(View.VISIBLE);
+            }
+
+            return footer;
         }
 
         // Create ItemView
@@ -63,7 +73,8 @@ public class MovieItemRecyclerViewAdapter extends RecyclerView.Adapter<MovieItem
                     .into(holder.mThumbnail);
 
             holder.mTitle.setText(mValues.get(position).getTitle());
-            holder.mReleaseyear.setText("Released: " + mValues.get(position).getReleaseyear());
+            holder.mReleased.setText("Released: " + mValues.get(position).getReleaseyear());
+            holder.mOverview.setText(mValues.get(position).getOverview());
 
             holder.mMovieListItem.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -79,18 +90,31 @@ public class MovieItemRecyclerViewAdapter extends RecyclerView.Adapter<MovieItem
     }
 
     public void insertFeedValues(List<MovieInfo> list){
-        if( list != null && list.size() != 0){
+        if( list != null ){
 
-            int old_length = mValues.size();
+            /**
+             * If list.size() greater than 0, we assume there are more data, otherwise
+             * we assume there is no more data, therefor we show TextView instead of the
+             * ProgressBar in footer
+             */
+            if (list.size() != 0) {
+                int old_length = mValues.size();
 
-            // Add an item to movie list
-            mValues.addAll(list);
+                // Add an item to movie list
+                mValues.addAll(list);
 
-            // Notify the adapter that an item inserted
-            notifyItemRangeInserted(old_length,list.size());
+                // Notify the adapter that an item inserted
+                notifyItemRangeInserted(old_length, list.size());
 
-            // Scroll to newly added item position
-//            mRecyclerView.scrollToPosition(list.size());
+                // Scroll to newly added item position
+//                mRecyclerView.scrollToPosition(list.size());
+
+                mFooterViewHolder.mProgressBar.setVisibility(View.VISIBLE);
+                mFooterViewHolder.mNoContent.setVisibility(View.GONE);
+            } else {
+                mFooterViewHolder.mProgressBar.setVisibility(View.GONE);
+                mFooterViewHolder.mNoContent.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -130,7 +154,9 @@ public class MovieItemRecyclerViewAdapter extends RecyclerView.Adapter<MovieItem
         public final View mMovieListItem;
         public final ImageView mThumbnail;
         public final TextView mTitle;
-        public final TextView mReleaseyear;
+        public final TextView mReleased;
+        public final TextView mOverview;
+
         public MovieInfo mMovieInfo;
 
         public ViewHolder(View view) {
@@ -138,7 +164,8 @@ public class MovieItemRecyclerViewAdapter extends RecyclerView.Adapter<MovieItem
             mMovieListItem = view;
             mThumbnail = (ImageView) view.findViewById(R.id.thumbnail);
             mTitle = (TextView) view.findViewById(R.id.title);
-            mReleaseyear = (TextView) view.findViewById(R.id.releaseyear);
+            mReleased = (TextView) view.findViewById(R.id.released);
+            mOverview = (TextView) view.findViewById(R.id.overview);
         }
 
         @Override
@@ -150,8 +177,16 @@ public class MovieItemRecyclerViewAdapter extends RecyclerView.Adapter<MovieItem
     // Define a view holder for Footer view
 
     public class FooterViewHolder extends ViewHolder {
-        public FooterViewHolder(View itemView) {
-            super(itemView);
+        public final View mFooter;
+        public final ProgressBar mProgressBar;
+        public final TextView mNoContent;
+
+        public FooterViewHolder(View view) {
+            super(view);
+            mFooter = view;
+            mProgressBar = (ProgressBar) itemView.findViewById(R.id.progressBar1);
+            mNoContent = (TextView) view.findViewById(R.id.noContent);
         }
+
     }
 }
